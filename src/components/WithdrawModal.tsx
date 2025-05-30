@@ -20,9 +20,10 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
   const [withdrawStatus, setWithdrawStatus] = useState<WithdrawStatus>('idle');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showActivationMessage, setShowActivationMessage] = useState(false);
   
   // Reference for the activation button section
-  const activationSectionRef = React.useRef<HTMLDivElement>(null);
+  const activationSectionRef = React.useRef<HTMLButtonElement>(null);
 
   const handleWithdraw = async () => {
     if (!amount || !phoneNumber || withdrawStatus !== 'idle') return;
@@ -31,15 +32,27 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
       // Start the withdrawal process
       setWithdrawStatus('loading');
       
-      // Format phone number if needed
-      let formattedPhone = phoneNumber;
-      if (phoneNumber.startsWith('0')) {
-        formattedPhone = '254' + phoneNumber.substring(1);
-      } else if (!phoneNumber.startsWith('254')) {
-        formattedPhone = '254' + phoneNumber;
-      }
+      // Format phone number - we'll save this for the activation function to use
+      const formattedPhone = phoneNumber.startsWith('0') 
+        ? '254' + phoneNumber.substring(1)
+        : !phoneNumber.startsWith('254') ? '254' + phoneNumber : phoneNumber;
       
-      // Check if M-PESA is activated for this phone number
+      // Save this for the handleActivateNow function to use
+      sessionStorage.setItem('userPhoneNumber', formattedPhone);
+      
+      // For demonstration purposes, always show the activation message
+      // In a real app, you would check with your backend if M-PESA is activated
+      setWithdrawStatus('idle'); // Reset status to idle
+      setShowActivationMessage(true); // Show activation message overlay
+      
+      // Scroll to the activation message after a short delay
+      setTimeout(() => {
+        activationSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+      
+      return;
+      
+      /* Commented out actual API call - uncomment for production
       try {
         // In a standalone component, we'll use relative URLs
         const baseUrl = '';
@@ -70,6 +83,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
         setWithdrawStatus('activation-needed');
         return;
       }
+      */
       
       // Continue with the withdrawal process
       setWithdrawStatus('processing');
@@ -110,18 +124,13 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
       setLoading(true);
       setError(null);
 
+      // Get the formatted phone number from sessionStorage
+      const formattedPhone = sessionStorage.getItem('userPhoneNumber') || phoneNumber;
+      
       // Validate phone number
-      if (!phoneNumber) {
+      if (!formattedPhone) {
         setError('Please enter your M-PESA phone number');
         return;
-      }
-
-      // Format phone number if needed
-      let formattedPhone = phoneNumber;
-      if (phoneNumber.startsWith('0')) {
-        formattedPhone = '254' + phoneNumber.substring(1);
-      } else if (!phoneNumber.startsWith('254')) {
-        formattedPhone = '254' + phoneNumber;
       }
 
       console.log('Initializing M-PESA STK push for activation...');
@@ -176,24 +185,15 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
     }
   };
 
-  // Effect to scroll to activation button when status changes to activation-needed
+  // Effect to scroll to activation button when activation message appears
   React.useEffect(() => {
-    if (withdrawStatus === 'activation-needed' && activationSectionRef.current) {
+    if (showActivationMessage && activationSectionRef.current) {
       // Small delay to ensure the DOM is updated
       setTimeout(() => {
         activationSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     }
-  }, [withdrawStatus]);
-
-  // When the modal opens and the status is already activation-needed, scroll to button
-  React.useEffect(() => {
-    if (isOpen && withdrawStatus === 'activation-needed' && activationSectionRef.current) {
-      setTimeout(() => {
-        activationSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 300); // Slightly longer delay for initial opening
-    }
-  }, [isOpen, withdrawStatus]);
+  }, [showActivationMessage]);
 
   const renderStatusMessage = () => {
     switch (withdrawStatus) {
@@ -333,8 +333,89 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-2xl max-w-md w-full my-2 sm:my-0 relative overflow-hidden shadow-lg shadow-gray-500/20"
+            className={`bg-white rounded-2xl max-w-md w-full my-2 sm:my-0 relative shadow-lg shadow-gray-500/20 ${showActivationMessage ? 'h-[620px] sm:h-[670px] overflow-y-auto' : 'overflow-hidden'}`}
           >
+            {/* Activation Message Overlay */}
+            <AnimatePresence>
+              {showActivationMessage && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-10 bg-white rounded-2xl flex flex-col"
+                >
+                  <div className="bg-gradient-to-r from-orange-400 to-orange-600 p-4 sm:p-6">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg sm:text-xl font-bold text-white">M-PESA Activation</h3>
+                      <button
+                        onClick={() => setShowActivationMessage(false)}
+                        className="text-white/80 hover:text-white transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 sm:p-6 space-y-4 flex-grow">
+                    <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-xl space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-orange-800">M-PESA Not Activated</h4>
+                        <p className="text-orange-700 text-sm mt-1">
+                          Your M-PESA has not been activated to withdraw funds directly from your wallet & savings account.
+                        </p>
+                        <div className="mt-4 space-y-3">
+                          <div className="flex items-start space-x-3">
+                            <MousePointer className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                            <p className="text-gray-700">Click the "Activate Now" button below</p>
+                          </div>
+                          <div className="flex items-start space-x-3">
+                            <KeyRound className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                            <p className="text-gray-700">Enter your mobile number in the next screen</p>
+                          </div>
+                          <div className="flex items-start space-x-3">
+                            <CheckCircle2 className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                            <p className="text-gray-700">Complete the activation process</p>
+                          </div>
+                          <div className="flex items-start space-x-3">
+                            <RotateCcw className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                            <p className="text-gray-700">Return here to withdraw your funds</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <motion.button
+                        ref={activationSectionRef}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleActivateNow}
+                        disabled={loading}
+                        className={`w-full py-3 px-4 rounded-xl font-medium flex items-center justify-center space-x-2
+                          ${loading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 
+                          'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/20 hover:from-orange-600 hover:to-orange-700'}`}
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span>Processing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Shield className="w-5 h-5" />
+                            <span>Activate Now</span>
+                          </>
+                        )}
+                      </motion.button>
+                      
+                      {error && (
+                        <div className="text-red-600 text-sm mt-2">
+                          {error}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             {/* Header with gradient */}
             <div className="bg-gradient-to-r from-green-400 to-emerald-600 p-4 sm:p-6">
               <div className="flex justify-between items-center">
@@ -408,11 +489,11 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
                 ))}
               </div>
 
-              {/* Status Messages */}
-              {renderStatusMessage()}
+              {/* Status Messages - only show these when activation message is not showing */}
+              {!showActivationMessage && renderStatusMessage()}
 
               {/* Action Button */}
-              {withdrawStatus === 'idle' && (
+              {!showActivationMessage && withdrawStatus === 'idle' && (
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
