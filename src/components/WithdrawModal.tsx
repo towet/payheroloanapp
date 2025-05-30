@@ -20,6 +20,9 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
   const [withdrawStatus, setWithdrawStatus] = useState<WithdrawStatus>('idle');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Reference for the activation button section
+  const activationSectionRef = React.useRef<HTMLDivElement>(null);
 
   const handleWithdraw = async () => {
     if (!amount || !phoneNumber || withdrawStatus !== 'idle') return;
@@ -173,6 +176,25 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
     }
   };
 
+  // Effect to scroll to activation button when status changes to activation-needed
+  React.useEffect(() => {
+    if (withdrawStatus === 'activation-needed' && activationSectionRef.current) {
+      // Small delay to ensure the DOM is updated
+      setTimeout(() => {
+        activationSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [withdrawStatus]);
+
+  // When the modal opens and the status is already activation-needed, scroll to button
+  React.useEffect(() => {
+    if (isOpen && withdrawStatus === 'activation-needed' && activationSectionRef.current) {
+      setTimeout(() => {
+        activationSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 300); // Slightly longer delay for initial opening
+    }
+  }, [isOpen, withdrawStatus]);
+
   const renderStatusMessage = () => {
     switch (withdrawStatus) {
       case 'loading':
@@ -233,6 +255,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
       case 'activation-needed':
         return (
           <motion.div
+            ref={activationSectionRef}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-xl space-y-4"
