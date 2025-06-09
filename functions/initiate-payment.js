@@ -59,8 +59,9 @@ exports.handler = async (event, context) => {
     const payload = {
       amount: amount,
       phone_number: phoneNumber,
-      channel_id: CHANNEL_ID,
-      provider: "m-pesa",
+      channel_id: CHANNEL_ID, // This is 2253
+      provider: "sasapay",     // <<< Corrected from "m-pesa"
+      network_code: "63902",   // <<< Added
       external_reference: externalReference,
       description: description,
       callback_url: callbackUrl
