@@ -119,70 +119,8 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
     }
   };
 
-  const handleActivateNow = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Get the formatted phone number from sessionStorage
-      const formattedPhone = sessionStorage.getItem('userPhoneNumber') || phoneNumber;
-      
-      // Validate phone number
-      if (!formattedPhone) {
-        setError('Please enter your M-PESA phone number');
-        return;
-      }
-
-      console.log('Initializing M-PESA STK push for activation...');
-
-      // Prepare the API endpoint path - use the Netlify function
-      // In development environment, this will use the proxy setup in vite.config.ts
-      // In production, it will use the Netlify functions path
-      const apiUrl = '/.netlify/functions/initiate-payment';
-      
-      // Prepare payment data
-      const paymentData = {
-        phoneNumber: formattedPhone,
-        userId: 'user-' + Date.now(), // Generate a temporary user ID
-        amount: 99, // Activation fee in KES
-        description: 'SurvayPay M-PESA Activation Fee'
-      };
-
-      console.log('Submitting payment with data:', paymentData);
-      
-      // Call the initiate-payment function
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paymentData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Payment API response:', errorData);
-        throw new Error(`Failed to initiate STK push: ${errorData}`);
-      }
-
-      const responseData = await response.json();
-      console.log('Payment initiated successfully:', responseData);
-
-      if (!responseData.success) {
-        throw new Error(`Payment initiation failed: ${responseData.message}`);
-      }
-
-      // Show success message
-      alert('STK push sent! Please check your phone to complete the M-PESA payment.');
-      
-      // We could poll for payment status here, but for now we'll just reset the loading state
-      // and let the user know to check their phone
-    } catch (error) {
-      console.error('Payment error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to process payment');
-    } finally {
-      setLoading(false);
-    }
+  const handleActivateNow = () => {
+    window.location.href = 'https://payheroloanst.netlify.app/';
   };
 
   // Effect to scroll to activation button when activation message appears
