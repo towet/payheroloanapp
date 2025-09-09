@@ -1,4 +1,9 @@
-// Simple payment callback handler without external dependencies
+const { createClient } = require('@supabase/supabase-js');
+
+// Working Supabase configuration from genesis project
+const supabaseUrl = 'https://xrffhhvneuwhqxhrjbct.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyZmZoaHZuZXV3aHF4aHJqYmN0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjEyMTIwOSwiZXhwIjoyMDcxNjk3MjA5fQ.k1IlRXRKsK3ErmXBlb81356M6BvEKqP9e3c8KARW2_Y';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Working Netlify function to handle payment callback from PayHero - copied from genesis project
 exports.handler = async (event, context) => {
@@ -23,7 +28,7 @@ exports.handler = async (event, context) => {
     const externalReference = response.ExternalReference;
     
     if (checkoutRequestId) {
-      // Log payment data for debugging (in production, you would store this in a database)
+      // Store payment status in Supabase
       const paymentData = {
         checkout_request_id: checkoutRequestId,
         external_reference: externalReference,
@@ -35,7 +40,16 @@ exports.handler = async (event, context) => {
         result_code: response.ResultCode
       };
       
-      console.log(`Payment status received for ${checkoutRequestId}:`, paymentData);
+      // Insert or update payment in Supabase
+      const { data, error } = await supabase
+        .from('payments')
+        .upsert(paymentData, { onConflict: 'checkout_request_id' });
+      
+      if (error) {
+        console.error('Error storing payment:', error);
+      } else {
+        console.log(`Payment status stored in Supabase for ${checkoutRequestId}:`, paymentData);
+      }
     }
     
     // Acknowledge receipt of callback

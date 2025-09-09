@@ -171,46 +171,48 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
     }
   };
 
-  const pollPaymentStatus = async (requestId: string) => {
+  const pollPaymentStatus = async (paymentRef: string) => {
     let attempts = 0;
     const maxAttempts = 30; // Poll for 5 minutes (30 * 10 seconds)
 
     const poll = async () => {
       try {
-        const response = await fetch('/.netlify/functions/payment-status', {
-          method: 'POST',
+        // Use GET request with path parameter (following JobHub pattern)
+        const response = await fetch(`/.netlify/functions/payment-status/${paymentRef}`, {
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ checkoutRequestId: requestId })
+          }
         });
 
         const data = await response.json();
-
         console.log('Payment status response:', data);
         
-        if (data.success) {
-          // Check multiple possible status locations
-          const resultCode = data.resultCode || data.data?.ResultCode || data.data?.result_code || data.status;
-          const resultDesc = data.resultDesc || data.data?.ResultDesc || data.data?.result_desc;
+        if (data.success && data.payment) {
+          const payment = data.payment;
+          const status = payment.status;
+          const resultCode = payment.resultCode;
           
-          console.log('Checking status - ResultCode:', resultCode, 'ResultDesc:', resultDesc);
+          console.log('Checking payment status:', status, 'ResultCode:', resultCode);
           
-          if (resultCode === '0' || resultCode === 0 || resultCode === 'Success' || resultCode === 'SUCCESS') {
+          if (status === 'SUCCESS' || resultCode === '0' || resultCode === 0) {
             // Payment successful
             console.log('Payment detected as successful!');
             setWithdrawStatus('payment-success');
             return;
-          } else if (resultCode && resultCode !== '1032' && resultCode !== 1032) {
-            // Payment failed (but not timeout)
-            console.log('Payment failed with code:', resultCode);
+          } else if (status === 'FAILED' || (resultCode && resultCode !== '0' && resultCode !== 0 && status !== 'PENDING')) {
+            // Payment failed
+            console.log('Payment failed with status:', status);
             setWithdrawStatus('failed');
-            setError(`Payment failed: ${resultDesc || 'Please try again.'}`);
+            setError(`Payment failed: ${payment.resultDesc || 'Please try again.'}`);
             return;
           }
           
-          // If no clear status yet, continue polling
+          // If status is PENDING, continue polling
           console.log('Payment still pending, continuing to poll...');
+        } else {
+          // If API call failed, continue polling but log the error
+          console.log('Payment status API error, continuing to poll:', data.error);
         }
 
         attempts++;

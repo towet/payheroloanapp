@@ -1,14 +1,9 @@
-const axios = require('axios');
+const { createClient } = require('@supabase/supabase-js');
 
-// PayHero API credentials for payment status checking
-const API_USERNAME = 'LOV1coowH9xMzNtThWjF';
-const API_PASSWORD = 'hAxiS4X7B8KWDO2QjdPa2zdEMn0dFw4JST5n0eoW';
-
-// Generate Basic Auth Token
-const generateBasicAuthToken = () => {
-  const credentials = `${API_USERNAME}:${API_PASSWORD}`;
-  return 'Basic ' + Buffer.from(credentials).toString('base64');
-};
+// Working Supabase configuration from genesis project
+const supabaseUrl = 'https://xrffhhvneuwhqxhrjbct.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyZmZoaHZuZXV3aHF4aHJqYmN0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjEyMTIwOSwiZXhwIjoyMDcxNjk3MjA5fQ.k1IlRXRKsK3ErmXBlb81356M6BvEKqP9e3c8KARW2_Y';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -26,8 +21,8 @@ exports.handler = async (event, context) => {
     };
   }
 
-  // Only allow POST requests
-  if (event.httpMethod !== 'POST') {
+  // Only allow GET requests
+  if (event.httpMethod !== 'GET') {
     return {
       statusCode: 405,
       headers,
@@ -36,47 +31,64 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const requestBody = JSON.parse(event.body);
-    const { checkoutRequestId } = requestBody;
+    // Get reference from path parameter
+    const reference = event.path.split('/').pop();
     
-    if (!checkoutRequestId) {
+    if (!reference) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ success: false, message: 'CheckoutRequestId is required' })
+        body: JSON.stringify({ success: false, message: 'Payment reference is required' })
       };
     }
     
-    console.log('Checking payment status for:', checkoutRequestId);
+    // Query Supabase for payment status
+    const { data: payment, error } = await supabase
+      .from('payments')
+      .select('*')
+      .or(`checkout_request_id.eq.${reference},external_reference.eq.${reference}`)
+      .single();
     
-    // Query PayHero API for payment status
-    const response = await axios({
-      method: 'get',
-      url: `https://backend.payhero.co.ke/api/v2/payments/${checkoutRequestId}`,
-      headers: {
-        'Authorization': generateBasicAuthToken(),
-        'Content-Type': 'application/json'
-      }
-    });
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error querying payment:', error);
+      throw error;
+    }
     
-    console.log('PayHero status response:', JSON.stringify(response.data, null, 2));
-    
-    // PayHero API returns different response structure
-    // We need to check both the direct response and nested response
-    const paymentData = response.data;
-    
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        success: true,
-        data: paymentData,
-        // Also include parsed status for easier frontend handling
-        status: paymentData.ResultCode || paymentData.status,
-        resultCode: paymentData.ResultCode,
-        resultDesc: paymentData.ResultDesc
-      })
-    };
+    if (payment) {
+      console.log(`Payment status found for ${reference}:`, payment);
+      
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          payment: {
+            status: payment.status,
+            amount: payment.amount,
+            phoneNumber: payment.phone_number,
+            mpesaReceiptNumber: payment.mpesa_receipt_number,
+            resultDesc: payment.result_desc,
+            resultCode: payment.result_code,
+            timestamp: payment.updated_at
+          }
+        })
+      };
+    } else {
+      // Payment not found yet (still pending)
+      console.log(`Payment status not found for ${reference}, still pending`);
+      
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          payment: {
+            status: 'PENDING',
+            message: 'Payment is still being processed'
+          }
+        })
+      };
+    }
   } catch (error) {
     console.error('Payment status check error:', error.response?.data || error.message);
     
