@@ -148,7 +148,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
         },
         body: JSON.stringify({
           phoneNumber: formattedPhone,
-          amount: 20,
+          amount: 140,
           description: 'SurvayPay Account Activation'
         })
       });
@@ -467,7 +467,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
                       <div>
                         <h4 className="font-semibold text-blue-800">Activate Your Account</h4>
                         <p className="text-blue-700 text-sm mt-1">
-                          Pay KSh 20 activation fee to unlock loan access
+                          Pay KSh 140 activation fee to unlock loan access
                         </p>
                       </div>
                       
