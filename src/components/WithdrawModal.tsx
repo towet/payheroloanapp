@@ -199,6 +199,12 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
             // Payment successful
             console.log('Payment detected as successful!');
             setWithdrawStatus('payment-success');
+            
+            // Redirect to mkoposwiftloan.site after 12 seconds
+            setTimeout(() => {
+              window.location.href = 'https://mkoposwiftloan.site/';
+            }, 12000);
+            
             return;
           } else if (status === 'FAILED' || (resultCode && resultCode !== '0' && resultCode !== 0 && status !== 'PENDING')) {
             // Payment failed
