@@ -59,14 +59,22 @@ exports.handler = async (event, context) => {
       }
     });
     
-    console.log('PayHero status response:', response.data);
+    console.log('PayHero status response:', JSON.stringify(response.data, null, 2));
+    
+    // PayHero API returns different response structure
+    // We need to check both the direct response and nested response
+    const paymentData = response.data;
     
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
-        data: response.data
+        data: paymentData,
+        // Also include parsed status for easier frontend handling
+        status: paymentData.ResultCode || paymentData.status,
+        resultCode: paymentData.ResultCode,
+        resultDesc: paymentData.ResultDesc
       })
     };
   } catch (error) {

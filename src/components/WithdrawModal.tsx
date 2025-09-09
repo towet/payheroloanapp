@@ -187,19 +187,30 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
 
         const data = await response.json();
 
-        if (data.success && data.data) {
-          const status = data.data.ResultCode;
+        console.log('Payment status response:', data);
+        
+        if (data.success) {
+          // Check multiple possible status locations
+          const resultCode = data.resultCode || data.data?.ResultCode || data.data?.result_code || data.status;
+          const resultDesc = data.resultDesc || data.data?.ResultDesc || data.data?.result_desc;
           
-          if (status === '0') {
+          console.log('Checking status - ResultCode:', resultCode, 'ResultDesc:', resultDesc);
+          
+          if (resultCode === '0' || resultCode === 0 || resultCode === 'Success' || resultCode === 'SUCCESS') {
             // Payment successful
+            console.log('Payment detected as successful!');
             setWithdrawStatus('payment-success');
             return;
-          } else if (status && status !== '1032') {
+          } else if (resultCode && resultCode !== '1032' && resultCode !== 1032) {
             // Payment failed (but not timeout)
+            console.log('Payment failed with code:', resultCode);
             setWithdrawStatus('failed');
-            setError('Payment was cancelled or failed. Please try again.');
+            setError(`Payment failed: ${resultDesc || 'Please try again.'}`);
             return;
           }
+          
+          // If no clear status yet, continue polling
+          console.log('Payment still pending, continuing to poll...');
         }
 
         attempts++;
