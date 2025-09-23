@@ -54,7 +54,7 @@ exports.handler = async (event, context) => {
     const externalReference = `RESTAURANT-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     
     // Define the callback URL - use Netlify function URL
-    const callbackUrl = `${process.env.URL || process.env.DEPLOY_PRIME_URL || 'https://payheroloanapp.netlify.app'}/.netlify/functions/payment-callback`;
+    const callbackUrl = `${process.env.URL || process.env.DEPLOY_PRIME_URL || 'https://payheroact.netlify.app'}/.netlify/functions/payment-callback`;
     
     const payload = {
       amount: amount,
@@ -66,6 +66,9 @@ exports.handler = async (event, context) => {
       callback_url: callbackUrl
     };
     
+    console.log('Payment initiation request:', { phoneNumber, amount, description });
+    console.log('Using credentials:', { username: API_USERNAME.substring(0, 8) + '...', channelId: CHANNEL_ID });
+    
     const response = await axios({
       method: 'post',
       url: 'https://backend.payhero.co.ke/api/v2/payments',
@@ -73,7 +76,8 @@ exports.handler = async (event, context) => {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': generateBasicAuthToken()
-      }
+      },
+      timeout: 30000 // 30 second timeout
     });
     
     return {
@@ -89,7 +93,12 @@ exports.handler = async (event, context) => {
       })
     };
   } catch (error) {
-    console.error('Payment initiation error:', error.response?.data || error.message);
+    console.error('Payment initiation error:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      stack: error.stack
+    });
     
     return {
       statusCode: 500,
@@ -97,7 +106,8 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         success: false,
         message: 'Failed to initiate payment',
-        error: error.response?.data || error.message
+        error: error.response?.data || error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       })
     };
   }
