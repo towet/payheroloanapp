@@ -1,0 +1,8 @@
+{
+  "name": "payheroloanapp-functions",
+  "version": "1.0.0",
+  "description": "Netlify functions for PayHero Loan App payment processing",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}
