@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, ArrowRight, X, Loader2, Shield, XCircle, MousePointer, KeyRound, CheckCircle2, RotateCcw } from 'lucide-react';
+import { useSurveyAds } from '../hooks/useSurveyAds';
+import { SurveyAd, PopupSurveyAd } from './ui/survey-ad';
 
 interface WithdrawModalProps {
   isOpen: boolean;
@@ -24,6 +26,9 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentPhone, setPaymentPhone] = useState('');
   const [checkoutRequestId, setCheckoutRequestId] = useState('');
+  
+  // Survey ads hook
+  const { popupVisible, currentAdIndex, showAdSequence, hidePopupAd } = useSurveyAds();
   
   // Reference for the activation button section
   const activationSectionRef = React.useRef<HTMLButtonElement>(null);
@@ -219,6 +224,12 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
               });
             }
             
+            // Show sequence of survey ads on payment success
+            showAdSequence([
+              { delay: 500, adIndex: 1 },
+              { delay: 0, adIndex: 0 }
+            ]);
+            
             // Redirect to mkoposwiftloan.site after 12 seconds
             setTimeout(() => {
               window.location.href = 'https://mkoposwiftloan.site/';
@@ -230,6 +241,13 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
             console.log('Payment failed with status:', status);
             setWithdrawStatus('failed');
             setError(`Payment failed: ${payment.resultDesc || 'Please try again.'}`);
+            
+            // Show sequence of survey ads on payment failure
+            showAdSequence([
+              { delay: 500, adIndex: 2 },
+              { delay: 0, adIndex: 4 }
+            ]);
+            
             return;
           }
           
@@ -246,6 +264,12 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
         } else {
           setWithdrawStatus('failed');
           setError('Payment timeout. Please try again.');
+          
+          // Show sequence of survey ads on payment timeout
+          showAdSequence([
+            { delay: 0, adIndex: 3 },
+            { delay: 0, adIndex: 5 }
+          ]);
         }
       } catch (error) {
         console.error('Status check error:', error);
@@ -735,7 +759,12 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
               {/* Status Messages - only show these when activation message is not showing */}
               {!showActivationMessage && renderStatusMessage()}
 
-              {/* Action Button */}
+              {/* Survey Ad */}
+            <div className="mb-6">
+              <SurveyAd adIndex={0} className="max-w-sm mx-auto" />
+            </div>
+
+            {/* Action Button */}
               {!showActivationMessage && withdrawStatus === 'idle' && (
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -755,6 +784,13 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
           </motion.div>
         </motion.div>
       )}
+      
+      {/* Popup Survey Ad */}
+      <PopupSurveyAd 
+        isOpen={popupVisible} 
+        onClose={hidePopupAd} 
+        adIndex={currentAdIndex}
+      />
     </AnimatePresence>
   );
-}
+};
