@@ -1,62 +1,55 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ExternalLink } from 'lucide-react';
+import { X } from 'lucide-react';
 
 // Survey ads data
 const surveyAds = [
   {
     id: 'survey-1',
-    title: 'Quick Survey - Earn KSh 500',
+    title: 'Quick Survey - Earn KSh 500!',
     description: 'Share your opinion and earn money instantly',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&h=200&fit=crop',
-    ctaText: 'Start Survey',
-    ctaUrl: 'https://surveypay.co.ke/survey/1',
-    reward: 'KSh 500'
+    buttonText: 'Start Survey',
+    bgColor: 'from-blue-500 to-blue-600',
+    url: 'https://surveypay75.netlify.app/'
   },
   {
-    id: 'survey-2',
-    title: 'Product Review Survey',
+    id: 'survey-2', 
+    title: 'Product Review - Get KSh 300!',
     description: 'Review products and get paid for your feedback',
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=200&fit=crop',
-    ctaText: 'Review Now',
-    ctaUrl: 'https://surveypay.co.ke/survey/2',
-    reward: 'KSh 300'
+    buttonText: 'Review Now',
+    bgColor: 'from-green-500 to-green-600',
+    url: 'https://surveypay75.netlify.app/'
   },
   {
     id: 'survey-3',
-    title: 'Market Research Survey',
-    description: 'Help businesses improve their services',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop',
-    ctaText: 'Participate',
-    ctaUrl: 'https://surveypay.co.ke/survey/3',
-    reward: 'KSh 400'
+    title: 'Market Research - Earn KSh 750!',
+    description: 'Help businesses improve by sharing your thoughts',
+    buttonText: 'Participate',
+    bgColor: 'from-purple-500 to-purple-600',
+    url: 'https://surveypay75.netlify.app/'
   },
   {
     id: 'survey-4',
-    title: 'Consumer Behavior Study',
-    description: 'Share your shopping habits and earn rewards',
-    image: 'https://images.unsplash.com/photo-1556742111-a301076d9d18?w=300&h=200&fit=crop',
-    ctaText: 'Join Study',
-    ctaUrl: 'https://surveypay.co.ke/survey/4',
-    reward: 'KSh 600'
+    title: 'App Testing - Get KSh 400!',
+    description: 'Test new apps and earn money for your time',
+    buttonText: 'Test Apps',
+    bgColor: 'from-orange-500 to-orange-600',
+    url: 'https://surveypay75.netlify.app/'
   },
   {
     id: 'survey-5',
-    title: 'Technology Usage Survey',
-    description: 'Tell us about your tech preferences',
-    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=300&h=200&fit=crop',
-    ctaText: 'Take Survey',
-    ctaUrl: 'https://surveypay.co.ke/survey/5',
-    reward: 'KSh 350'
+    title: 'Opinion Poll - Earn KSh 250!',
+    description: 'Quick polls that pay you for your opinions',
+    buttonText: 'Vote Now',
+    bgColor: 'from-red-500 to-red-600',
+    url: 'https://surveypay75.netlify.app/'
   },
   {
     id: 'survey-6',
-    title: 'Financial Services Survey',
-    description: 'Help improve financial products in Kenya',
-    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=300&h=200&fit=crop',
-    ctaText: 'Get Started',
-    ctaUrl: 'https://surveypay.co.ke/survey/6',
-    reward: 'KSh 450'
+    title: 'Data Collection - Get KSh 600!',
+    description: 'Help with research and earn extra income',
+    buttonText: 'Contribute',
+    bgColor: 'from-indigo-500 to-indigo-600',
+    url: 'https://surveypay75.netlify.app/'
   }
 ];
 
@@ -77,37 +70,21 @@ export const SurveyAd: React.FC<SurveyAdProps> = ({ adIndex, className = '' }) =
       });
     }
     
-    window.open(ad.ctaUrl, '_blank');
+    window.open(ad.url, '_blank');
   };
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm ${className}`}>
-      <div className="relative">
-        <img 
-          src={ad.image} 
-          alt={ad.title}
-          className="w-full h-32 object-cover"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x200?text=Survey+Ad';
-          }}
-        />
-        <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-          {ad.reward}
-        </div>
+    <div className={`bg-gradient-to-r ${ad.bgColor} rounded-lg p-4 text-white shadow-lg ${className}`}>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-bold text-sm">{ad.title}</h3>
       </div>
-      
-      <div className="p-3">
-        <h3 className="font-semibold text-sm text-gray-800 mb-1">{ad.title}</h3>
-        <p className="text-xs text-gray-600 mb-3">{ad.description}</p>
-        
-        <button
-          onClick={handleClick}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors flex items-center justify-center space-x-1"
-        >
-          <span>{ad.ctaText}</span>
-          <ExternalLink className="w-3 h-3" />
-        </button>
-      </div>
+      <p className="text-xs mb-3 opacity-90">{ad.description}</p>
+      <button
+        onClick={handleClick}
+        className="w-full bg-white text-gray-800 font-semibold py-2 px-4 rounded text-sm hover:bg-gray-100 transition-colors"
+      >
+        {ad.buttonText}
+      </button>
     </div>
   );
 };
@@ -130,83 +107,43 @@ export const PopupSurveyAd: React.FC<PopupSurveyAdProps> = ({ isOpen, onClose, a
       });
     }
     
-    window.open(ad.ctaUrl, '_blank');
+    window.open(ad.url, '_blank');
     onClose();
   };
 
-  const handleClose = () => {
-    // Track ad close
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'survey_popup_close', {
-        ad_id: ad.id,
-        ad_title: ad.title
-      });
-    }
-    
-    onClose();
-  };
+  if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
-          onClick={handleClose}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className={`bg-gradient-to-r ${ad.bgColor} rounded-2xl p-6 text-white shadow-2xl max-w-sm w-full relative`}>
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors"
         >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative">
-              <img 
-                src={ad.image} 
-                alt={ad.title}
-                className="w-full h-48 object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x200?text=Survey+Ad';
-                }}
-              />
-              <button
-                onClick={handleClose}
-                className="absolute top-3 right-3 bg-white/90 hover:bg-white text-gray-700 rounded-full p-2 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <div className="absolute top-3 left-3 bg-green-500 text-white text-sm px-3 py-1 rounded-full font-medium">
-                Earn {ad.reward}
-              </div>
-            </div>
+          <X size={20} />
+        </button>
+        
+        <div className="text-center">
+          <h2 className="text-xl font-bold mb-3">{ad.title}</h2>
+          <p className="text-sm mb-6 opacity-90">{ad.description}</p>
+          
+          <div className="space-y-3">
+            <button
+              onClick={handleClick}
+              className="w-full bg-white text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              {ad.buttonText}
+            </button>
             
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-2">{ad.title}</h3>
-              <p className="text-gray-600 mb-4">{ad.description}</p>
-              
-              <div className="space-y-3">
-                <button
-                  onClick={handleClick}
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
-                >
-                  <span>{ad.ctaText}</span>
-                  <ExternalLink className="w-4 h-4" />
-                </button>
-                
-                <button
-                  onClick={handleClose}
-                  className="w-full text-gray-500 hover:text-gray-700 text-sm font-medium py-2 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+            <button
+              onClick={onClose}
+              className="w-full text-white border border-white border-opacity-50 py-2 px-6 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors text-sm"
+            >
+              Maybe Later
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };

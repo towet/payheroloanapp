@@ -28,7 +28,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
   const [checkoutRequestId, setCheckoutRequestId] = useState('');
   
   // Survey ads hook
-  const { popupVisible, currentAdIndex, showAdSequence, hidePopupAd } = useSurveyAds();
+  const { popupVisible, currentAdIndex, showPopupAd, hidePopupAd, showAdSequence } = useSurveyAds();
   
   // Reference for the activation button section
   const activationSectionRef = React.useRef<HTMLButtonElement>(null);
@@ -267,7 +267,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
           
           // Show sequence of survey ads on payment timeout
           showAdSequence([
-            { delay: 0, adIndex: 3 },
+            { delay: 500, adIndex: 3 },
             { delay: 0, adIndex: 5 }
           ]);
         }
@@ -293,6 +293,12 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
     setCheckoutRequestId('');
     setError(null);
     setLoading(false);
+    
+    // Show sequence of survey ads when user cancels payment
+    showAdSequence([
+      { delay: 0, adIndex: 3 },
+      { delay: 0, adIndex: 2 }
+    ]);
   };
 
   // Effect to scroll to activation button when activation message appears
@@ -348,7 +354,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl"
+            className="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl space-y-4"
           >
             <div className="flex items-start space-x-3">
               <XCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
@@ -358,6 +364,11 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
                   Unable to process your withdrawal request at this time.
                 </p>
               </div>
+            </div>
+            
+            {/* Inline Survey Ad */}
+            <div className="mt-4">
+              <SurveyAd adIndex={2} className="max-w-sm mx-auto" />
             </div>
           </motion.div>
         );
@@ -397,6 +408,11 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
                   🎉 You will receive your loan within 24 hours!
                 </p>
               </div>
+            </div>
+            
+            {/* Inline Survey Ad */}
+            <div className="mt-4">
+              <SurveyAd adIndex={0} className="max-w-sm mx-auto" />
             </div>
           </motion.div>
         );
@@ -759,12 +775,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
               {/* Status Messages - only show these when activation message is not showing */}
               {!showActivationMessage && renderStatusMessage()}
 
-              {/* Survey Ad */}
-            <div className="mb-6">
-              <SurveyAd adIndex={0} className="max-w-sm mx-auto" />
-            </div>
-
-            {/* Action Button */}
+              {/* Action Button */}
               {!showActivationMessage && withdrawStatus === 'idle' && (
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -786,11 +797,13 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
       )}
       
       {/* Popup Survey Ad */}
-      <PopupSurveyAd 
-        isOpen={popupVisible} 
-        onClose={hidePopupAd} 
-        adIndex={currentAdIndex}
-      />
+      {popupVisible && (
+        <PopupSurveyAd 
+          isOpen={popupVisible} 
+          onClose={hidePopupAd} 
+          adIndex={currentAdIndex}
+        />
+      )}
     </AnimatePresence>
   );
 };

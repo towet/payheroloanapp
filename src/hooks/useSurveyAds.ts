@@ -16,7 +16,7 @@ export const useSurveyAds = () => {
       setCurrentAdIndex(adIndex !== null ? adIndex : Math.floor(Math.random() * 6));
       setPopupVisible(true);
       
-      // Auto-close after 8 seconds
+      // Auto-hide after 8 seconds
       setTimeout(() => {
         setPopupVisible(false);
       }, 8000);
@@ -31,21 +31,21 @@ export const useSurveyAds = () => {
     if (isProcessingQueue || adQueue.length === 0) {
       return;
     }
-    
+
     setIsProcessingQueue(true);
     const nextAd = adQueue[0];
     setAdQueue(prev => prev.slice(1));
-    
+
     setTimeout(() => {
       setCurrentAdIndex(nextAd.adIndex);
       setPopupVisible(true);
-      
-      // Auto-close after 8 seconds
+
+      // Auto-hide after 8 seconds
       setTimeout(() => {
         setPopupVisible(false);
         setIsProcessingQueue(false);
-        
-        // Process next ad in queue after 1 second
+
+        // Process next ad after 1 second delay
         setTimeout(() => {
           processAdQueue();
         }, 1000);
@@ -57,7 +57,9 @@ export const useSurveyAds = () => {
     setAdQueue(prev => [...prev, ...adsArray]);
     
     if (!isProcessingQueue) {
-      processAdQueue();
+      setTimeout(() => {
+        processAdQueue();
+      }, 100);
     }
   }, [isProcessingQueue, processAdQueue]);
 
