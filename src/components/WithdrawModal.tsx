@@ -249,6 +249,19 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
             ]);
             
             return;
+          } else if (status === 'CANCELLED') {
+            // Payment cancelled by user
+            console.log('Payment cancelled by user');
+            setWithdrawStatus('failed');
+            setError('Payment was cancelled. Please try again.');
+            
+            // Show sequence of survey ads on payment cancellation
+            showAdSequence([
+              { delay: 300, adIndex: 3 },
+              { delay: 0, adIndex: 2 }
+            ]);
+            
+            return;
           }
           
           // If status is PENDING, continue polling
@@ -279,6 +292,12 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
         } else {
           setWithdrawStatus('failed');
           setError('Unable to verify payment status.');
+          
+          // Show sequence of survey ads on verification failure
+          showAdSequence([
+            { delay: 500, adIndex: 3 },
+            { delay: 0, adIndex: 2 }
+          ]);
         }
       }
     };
