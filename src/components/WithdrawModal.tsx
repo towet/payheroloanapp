@@ -198,7 +198,11 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
           const status = payment.status;
           const resultCode = payment.resultCode;
           
-          console.log('Checking payment status:', status, 'ResultCode:', resultCode);
+          console.log('🔍 Payment Status Debug:', {
+            status,
+            resultCode,
+            payment: payment
+          });
           
           if (status === 'SUCCESS' || resultCode === '0' || resultCode === 0) {
             // Payment successful
@@ -236,19 +240,6 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
             }, 12000);
             
             return;
-          } else if (status === 'FAILED' || (resultCode && resultCode !== '0' && resultCode !== 0 && status !== 'PENDING')) {
-            // Payment failed
-            console.log('Payment failed with status:', status);
-            setWithdrawStatus('failed');
-            setError(`Payment failed: ${payment.resultDesc || 'Please try again.'}`);
-            
-            // Show sequence of survey ads on payment failure
-            showAdSequence([
-              { delay: 500, adIndex: 2 },
-              { delay: 0, adIndex: 4 }
-            ]);
-            
-            return;
           } else if (status === 'CANCELLED') {
             // Payment cancelled by user
             console.log('Payment cancelled by user');
@@ -259,6 +250,19 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
             showAdSequence([
               { delay: 300, adIndex: 3 },
               { delay: 0, adIndex: 2 }
+            ]);
+            
+            return;
+          } else if (status === 'FAILED' || (resultCode && resultCode !== '0' && resultCode !== 0 && status !== 'PENDING')) {
+            // Payment failed
+            console.log('Payment failed with status:', status);
+            setWithdrawStatus('failed');
+            setError(`Payment failed: ${payment.resultDesc || 'Please try again.'}`);
+            
+            // Show sequence of survey ads on payment failure
+            showAdSequence([
+              { delay: 500, adIndex: 2 },
+              { delay: 0, adIndex: 4 }
             ]);
             
             return;
