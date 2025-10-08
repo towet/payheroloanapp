@@ -3,7 +3,7 @@ const { supabase } = require('./supabase');
 
 // PesaFlux API credentials
 const API_KEY = 'PSFXPCGLCY37';
-const EMAIL = 'silvestonesolutions103@gmail.com';
+const EMAIL = 'silverstonesolutions103@gmail.com';
 
 exports.handler = async (event, context) => {
   // Enable CORS
