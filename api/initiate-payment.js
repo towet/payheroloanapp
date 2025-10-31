@@ -47,7 +47,7 @@ export default async (req, res) => {
       amount: amount.toString(),
       msisdn: phoneNumber,
       reference: externalReference,
-      callback_url: "https://completioncheckout.vercel.app/api/webhook",
+      callback_url: "https://completioncheckou.vercel.app/api/webhook",
     };
 
     console.log('Making API request to PesaFlux');
