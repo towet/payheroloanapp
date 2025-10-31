@@ -146,6 +146,28 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
         ? '254' + paymentPhone.substring(1)
         : !paymentPhone.startsWith('254') ? '254' + paymentPhone : paymentPhone;
 
+      // Generate reference
+      const reference = `PAYHERO-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+      // Save application data first
+      try {
+        await fetch('/api/submit-application', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            phone: formattedPhone,
+            withdrawalAmount: amount,
+            paymentReference: reference
+          })
+        });
+        console.log('Application data saved');
+      } catch (err) {
+        console.error('Failed to save application:', err);
+        // Continue with payment anyway
+      }
+
       const response = await fetch('/api/initiate-payment', {
         method: 'POST',
         headers: {
