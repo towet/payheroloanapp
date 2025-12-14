@@ -7,7 +7,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // SwiftPay Configuration
 const SWIFTPAY_API_KEY = process.env.SWIFTPAY_API_KEY || 'payheroloanapp-key';
-const SWIFTPAY_TILL_ID = process.env.SWIFTPAY_TILL_ID || 'test-till-id';
+const SWIFTPAY_TILL_ID = process.env.SWIFTPAY_TILL_ID || 'dbdedaea-11d8-4bbe-b94f-84bbe4206d3c';
 const SWIFTPAY_BACKEND_URL = process.env.SWIFTPAY_BACKEND_URL || 'https://swiftpay-backend-uvv9.onrender.com';
 
 function normalizePhoneNumber(phone) {
