@@ -174,19 +174,20 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          phoneNumber: formattedPhone,
+          msisdn: formattedPhone,
           amount: 140,
-          description: 'SurvayPay Account Activation'
+          description: 'PayHero Loan Activation Fee'
         })
       });
 
       const data = await response.json();
 
       if (data.success) {
-        setCheckoutRequestId(data.data.checkoutRequestId);
+        const requestId = data.data.requestId || data.data.checkoutRequestId || data.data.transactionRequestId;
+        setCheckoutRequestId(requestId);
         setWithdrawStatus('payment-initiated');
         // Start polling for payment status
-        pollPaymentStatus(data.data.checkoutRequestId);
+        pollPaymentStatus(requestId);
       } else {
         setError(data.message || 'Failed to initiate payment');
       }
