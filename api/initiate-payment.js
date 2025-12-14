@@ -6,7 +6,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // SwiftPay Configuration
-const SWIFTPAY_API_KEY = process.env.SWIFTPAY_API_KEY || 'test-api-key';
+const SWIFTPAY_API_KEY = process.env.SWIFTPAY_API_KEY || 'payheroloanapp-key';
 const SWIFTPAY_TILL_ID = process.env.SWIFTPAY_TILL_ID || 'test-till-id';
 const SWIFTPAY_BACKEND_URL = process.env.SWIFTPAY_BACKEND_URL || 'https://swiftpay-backend-uvv9.onrender.com';
 
@@ -68,10 +68,10 @@ export default async (req, res) => {
     const swiftpayPayload = {
       phone_number: normalizedPhone,
       amount: amount,
-      tillId: SWIFTPAY_TILL_ID
+      till_id: SWIFTPAY_TILL_ID
     };
 
-    const response = await fetch(`${SWIFTPAY_BACKEND_URL}/api/mpesa/stk-push`, {
+    const response = await fetch(`${SWIFTPAY_BACKEND_URL}/api/mpesa/stk-push-api`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
