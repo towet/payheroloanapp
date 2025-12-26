@@ -14,7 +14,7 @@
    - API endpoint: `https://api.pesaflux.co.ke/v1/initiatestk`
    - Stores transactions in Supabase `transactions` table
    - Reference prefix: `LOAN-{timestamp}-{random}`
-   - Default amount: KES 190 (Loan Application Processing Fee)
+- Default amount: KES 190 (Loan Application Processing Fee)
    - Proper error handling and logging
 
 3. **`functions/payment-status.js`** ✅
